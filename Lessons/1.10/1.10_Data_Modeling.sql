@@ -1,0 +1,38 @@
+select
+    job_id,
+    job_title_short,
+    salary_year_avg,
+    company_id
+from
+    job_postings_fact
+limit 10;
+
+--
+
+select
+    *
+from 
+    company_dim
+where
+    name in ('Facebook', 'Google')
+limit 10;
+
+--
+
+select *
+from skills_dim
+limit 5;
+
+--
+
+select *
+from information_schema.tables
+where table_catalog = 'data_jobs';
+
+--
+
+pragma show_tables_expanded;
+
+--
+
+describe job_postings_fact;
