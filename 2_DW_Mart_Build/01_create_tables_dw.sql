@@ -1,23 +1,33 @@
--- step 1: dw - create start schema tables
-drop table if exists skills_job_dim;
-drop table if exists job_postings_fact;
-drop table if exists company_dim;
-drop table if exists skills_dim;
+-- Step 1: DW - Create star schema tables (Data Warehouse)
+-- Run this first
 
+-- Set up initial configurations
+PRAGMA enable_progress_bar;
+PRAGMA enable_checkpoint_on_shutdown;
 
-create table company_dim (
-    company_id integer primary key,
-    name varchar
+-- Drop existing tables if they exist (for idempotency)
+DROP TABLE IF EXISTS skills_job_dim;
+DROP TABLE IF EXISTS job_postings_fact;
+DROP TABLE IF EXISTS skills_dim;
+DROP TABLE IF EXISTS company_dim;
+
+-- Create company_dim table
+CREATE TABLE company_dim (
+    company_id INTEGER PRIMARY KEY,
+    name VARCHAR,
+    link VARCHAR,
+    link_google VARCHAR,
+    thumbnail VARCHAR
 );
 
-
-create table skills_dim (
-    skill_id integer primary key,
-    skills varchar,
-    type varchar
+-- Create skills_dim table
+CREATE TABLE skills_dim (
+    skill_id INTEGER PRIMARY KEY,
+    skills VARCHAR,
+    type VARCHAR
 );
 
-
+-- Create job_postings_fact table (must be created before skills_job_dim)
 CREATE TABLE job_postings_fact (
     job_id INTEGER PRIMARY KEY,
     company_id INTEGER,
@@ -35,17 +45,17 @@ CREATE TABLE job_postings_fact (
     salary_rate VARCHAR,
     salary_year_avg DOUBLE,
     salary_hour_avg DOUBLE,
-    foreign key (company_id) references company_dim(company_id)
+    FOREIGN KEY (company_id) REFERENCES company_dim(company_id)
 );
 
-create table skills_job_dim (
-    skill_id integer,
-    job_id integer,
-    primary key (skill_id, job_id),
-    foreign key (skill_id) references skills_dim(skill_id),
-    foreign key (job_id) references job_postings_fact(job_id),
+-- Create skills_job_dim bridge table (after job_postings_fact exists)
+CREATE TABLE skills_job_dim (
+    skill_id INTEGER,
+    job_id INTEGER,
+    PRIMARY KEY (skill_id, job_id),
+    FOREIGN KEY (skill_id) REFERENCES skills_dim(skill_id),
+    FOREIGN KEY (job_id) REFERENCES job_postings_fact(job_id)
 );
 
-select table_name
-from information_schema.tables
-where table_schema = 'main';
+-- Verify tables were created
+SHOW TABLES;
